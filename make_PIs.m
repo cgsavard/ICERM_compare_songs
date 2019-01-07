@@ -1,5 +1,5 @@
 function [ PIs ] = make_PIs(interval_data, res, sig, weight_func, params,...
-    norm_fcn,type)
+    norm_fcn,type, persistence_coords)
 
 %make_PIs generates the set of persistence images for the PH interval data
 %stored in the cell array titled interval_data.
@@ -29,8 +29,8 @@ function [ PIs ] = make_PIs(interval_data, res, sig, weight_func, params,...
 %OUTPUTS:    PIs - The set of persistence images generated based on the
 %            options specified for the provided interval data.
 
-[ b_p_data, max_b_p, problems ] = ...
-    norm_birth_persistence_coords(interval_data, norm_fcn);
+[ coord_data, max_b_p, problems ] = ...
+    persistence_coords(interval_data, norm_fcn);
 
 %first do a check to make sure all the points (birth,persistence) points
 %are viable.
@@ -40,22 +40,30 @@ elseif size(problems,1)==0;
     'All positive Persistence, continuing'
 end
 
-if nargin>7
+if nargin>8
     error('Error: too many input arguments')
+elseif nargin==8
+    res=res;
+    sig=sig;
+    weight_func=weight_func;
+    params=params;
+    norm_fcn = norm_fcn;
+    type=type;
+    persistence_coords = persistence_coords;
 elseif nargin==7
     res=res;
     sig=sig;
     weight_func=weight_func;
     params=params;
-    type=type;
     norm_fcn = norm_fcn;
+    type=type;
 elseif nargin==6
     res=res;
     sig=sig;
     weight_func=weight_func;
     params=params;
-    type=1;
     norm_fcn = norm_fcn;
+    type=1;
 elseif nargin==5
     res=res;
     sig=sig;
@@ -91,91 +99,22 @@ end
     
     
 if type==1       
-    [ data_images ] = hard_bound_PIs( b_p_data, max_b_p, weight_func, ...
+    [ data_images ] = hard_bound_PIs( coord_data, max_b_p, weight_func, ...
         params, res,sig);
 elseif type==2
-    [ data_images ] = soft_bound_PIs( b_p_data, max_b_p, weight_func, ...
+    [ data_images ] = soft_bound_PIs( coord_data, max_b_p, weight_func, ...
         params, res,sig);
 end
     PIs=data_images;
-    
-function [ b_p_data, max_b_p, problems] = ...
-        norm_birth_persistence_coords(interval_data, norm_fcn )
-    
-%norm_birth_persistence_coords takes in the interval data as output by the
-%duke TDA code (birth-death coordinates) and changes them into
-%birth-persistence coordinates with birth normalized from 0 to 1
-%
-%INPUTS:     interval_data - is a cell array containing the interval data
-%            for all of the point clouds in consideration. Each sheet in
-%            the cell array corresponds to a different Betti dimension.
-%            Each interval set is assumed to be an nX2 matrix with the
-%            first column corresponding to the birth times of features and
-%            the second column is the death time of each feature. All death
-%            times must be greater than the birth time and there must be a
-%            finite death time for each feature. 
-%            norm_fcn - the function used to normalize the points between
-%            0 and 1
-%
-%OUTPUT:     -b_p_interval_data: This is the modified coordinate data
-%            in a cell array. The sheets contain the modified song data.
-%            -max_b_p: gives the maximal persistence and maximal
-%            birth time across all point clouds for each song. 
-%            This information is used to create the boundaries for the
-%            persistence images.
 
-[m,n,o]=size(interval_data);
-max_persistences=zeros(m,n,o);
-max_birth_times=zeros(m,n,o);
-birth_persistence=cell(m,n,o);
-problems=[];
-
-for k=1:o
-for i=1:n
-    for j=1:m
-        B=interval_data{j,i,k};
-        %pulls the song interval data for the (j,i)th point cloud.
-        max_persistences(j,i,k)=max(B(:,2)-B(:,1));
-        %computes the song persistence (death-birth) for the songs
-        max_birth_times(j,i,k)=max(B(:,1));
-        %determines that maximal birth time for that songs. We will take 
-        %the maximum over all of point clouds to generate non-normalized 
-        %song PIs. 
-        C=B(:,2)-B(:,1);
-        %fcn to normalize births linearly between 0 and 1
-        b_norm = norm_fcn(B(:,1));
-        birth_persistence{j,i,k}=[b_norm, C];
-        %birth-persistence coordinates for song
-        D=find(C<0);
-        if length(D)>0
-            problems=[problems; j,i,k];
-        elseif length(D)==0
-            problems=problems;
-        end
-
-    end
-end
-song_max_birth(k,1)=1;
-%determine the maximum birth time of all song features across the point
-%clouds
-song_max_persistence(k,1)=max(max(max_persistences(:,:,k)));
-%determine the maximum persistence of all song features across the point
-%clouds
-end
-max_b_p=[song_max_birth, song_max_persistence];
-b_p_data=birth_persistence;
-
-end
-
-
-function [ data_images ] = hard_bound_PIs( b_p_data, max_b_p, ...
+function [ data_images ] = hard_bound_PIs( coord_data, max_b_p, ...
         weight_func, params, res, sig)
     
 %hard_bound_PIs generates the PIs for a set of point clouds with the
-%b_p_data. Hard refers to the fact that we cut the boundaries off hard at
+%coord_data. Hard refers to the fact that we cut the boundaries off hard at
 %the maximum values. 
 %
-%   INPUTS:        b_p_data - birth-persistence points for each of the
+%   INPUTS:        coord_data - birth-persistence points for each of the
 %                  point clouds. Each sheet corresponds to a different
 %                  Betti dimension.
 %                  max_b_p - gives the maximal persistence and maximal
@@ -194,7 +133,7 @@ function [ data_images ] = hard_bound_PIs( b_p_data, max_b_p, ...
 %                  corresponds to the PIs generated for different song
 %                  interval data.
 
-[m,n,o]=size(b_p_data);
+[m,n,o]=size(coord_data);
 data_images=cell(m,n,o);
 
 for k=1:o  
@@ -209,7 +148,7 @@ grid_values2_song=song_max_p:-persistence_stepsize_song:0; %must be decreasing f
 
             for p=1:m
                 for t=1:n
-                song=b_p_data{p,t,k}; %song birth persistence data
+                song=coord_data{p,t,k}; %song birth persistence data
                 %CHANGES TO THE WIEGHT FUNCTION INPUTS HAPPEN IN THE ROW
                 %BELOW
                 [weights]=arrayfun(@(row) weight_func(song(row,:), params), 1:size(song,1))';
@@ -224,14 +163,14 @@ end
 end
 
 
-function [ data_images ] = soft_bound_PIs( b_p_data, max_b_p, ...
+function [ data_images ] = soft_bound_PIs( coord_data, max_b_p, ...
         weight_func, params, res, sig)
     
 %soft_bound_PIs generates the PIs for a set of point clouds with the
-%b_p_data. Soft refers to the fact that we add three times the variance
+%coord_data. Soft refers to the fact that we add three times the variance
 % to the maximal values to determine our boundaries.
 %
-%   INPUTS:        b_p_data - birth-persistence points for each of the
+%   INPUTS:        coord_data - birth-persistence points for each of the
 %                  point clouds. Each sheet corresponds to a different
 %                  song
 %                  max_b_p - gives the maximal persistence and maximal
@@ -250,7 +189,7 @@ function [ data_images ] = soft_bound_PIs( b_p_data, max_b_p, ...
 %                  corresponds to the PIs generated for different song
 %                  interval data.
 
-[m,n,o]=size(b_p_data);
+[m,n,o]=size(coord_data);
 data_images=cell(m,n,o);
 
 for k=1:o    
@@ -266,7 +205,7 @@ grid_values2_song=(song_max_p+3*end_sig):-persistence_stepsize_song:0; %must be 
 
             for p=1:m
                 for t=1:n
-                song=b_p_data{p,t,k}; %birth-persistence data
+                song=coord_data{p,t,k}; %birth-persistence data
                 %CHANGES TO THE WIEGHT FUNCTION INPUTS HAPPEN IN THE ROW
                 %BELOW
                 [weights]=arrayfun(@(row) weight_func(song(row,:), params), 1:size(song,1))';

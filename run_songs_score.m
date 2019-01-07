@@ -21,7 +21,7 @@ for ii = 1:num_songs
     %good2 = 0;
     song = string(fgetl(infile));
 
-    filename1 = strcat("../",data,"/Expanded/",song);
+    filename1 = strcat("ScoreData/",data,"/Expanded/",song);
     load (filename1);
     [p_matrix1] = make_p_diagram(full_matrix_no, full_key);
     if isempty(p_matrix1)
@@ -32,7 +32,7 @@ for ii = 1:num_songs
         songs{end+1,1} = p_matrix1;
     end
     
-    filename2 = strcat("../",data,"/NotExpanded/",song);
+    filename2 = strcat("ScoreData/",data,"/NotExpanded/",song);
     load (filename2);
     [p_matrix2] = make_p_diagram(full_matrix_no, full_key);
     if isempty(p_matrix2)
@@ -63,7 +63,9 @@ sig=@sigma_parabolic;
 weight_func=@linear_inc;
 params=[0,80]; %[min, max]
 norm_fcn = @norm_lin; %Cheb or norm_lin
+type = 1;
+persistence_coords = @norm_midpoint_persistence_coords;
  %use default setting for hard/soft bounds or specify type=0 or type=1
-[ PIs ] = make_PIs(songs, res, sig, weight_func, params, norm_fcn);
+[ PIs ] = make_PIs(songs, res, sig, weight_func, params, norm_fcn, type, persistence_coords);
 
 toc
