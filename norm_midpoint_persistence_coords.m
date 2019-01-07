@@ -1,4 +1,4 @@
-function [ m_p_data, max_b_p, problems] = ...
+function [ m_p_data, max_coords, problems] = ...
         norm_midpoint_persistence_coords(interval_data, norm_fcn )
     
 %norm_midpoint_persistence_coords takes in the interval data as output by the
@@ -19,14 +19,14 @@ function [ m_p_data, max_b_p, problems] = ...
 %OUTPUT:     -m_p_data: This is the modified coordinate data
 %            in a cell array. The sheets contain the modified song data,
 %            with the midpoint and persistence.
-%            -max_b_p: gives the maximal persistence and maximal
-%            birth time across all point clouds for each song. 
+%            -max_coords: gives the maximal midpoint and maximal
+%            persistence across all point clouds for each song. 
 %            This information is used to create the boundaries for the
 %            persistence images.
 
 [m,n,o]=size(interval_data);
 max_persistences=zeros(m,n,o);
-max_birth_times=zeros(m,n,o);
+max_midpoint_times=zeros(m,n,o);
 midpoint_persistence=cell(m,n,o);
 problems=[];
 
@@ -37,7 +37,7 @@ for i=1:n
         %pulls the song interval data for the (j,i)th point cloud.
         max_persistences(j,i,k)=max(B(:,2)-B(:,1));
         %computes the song persistence (death-birth) for the songs
-        max_birth_times(j,i,k)=max(B(:,1));
+        max_midpoint_times(j,i,k)=max(B(:,1));
         %determines that maximal birth time for that songs. We will take 
         %the maximum over all of point clouds to generate non-normalized 
         %song PIs. 
@@ -56,14 +56,14 @@ for i=1:n
 
     end
 end
-song_max_birth(k,1)=1;
+song_max_midpoint(k,1)=1;
 %determine the maximum birth time of all song features across the point
 %clouds
 song_max_persistence(k,1)=max(max(max_persistences(:,:,k)));
 %determine the maximum persistence of all song features across the point
 %clouds
 end
-max_b_p=[song_max_birth, song_max_persistence];
+max_coords=[song_max_midpoint, song_max_persistence];
 m_p_data=midpoint_persistence;
 
 end

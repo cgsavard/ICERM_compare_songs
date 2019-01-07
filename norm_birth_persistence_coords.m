@@ -1,4 +1,4 @@
-function [ b_p_data, max_b_p, problems] = ...
+function [ b_p_data, max_coords, problems] = ...
         norm_birth_persistence_coords(interval_data, norm_fcn )
     
 %norm_birth_persistence_coords takes in the interval data as output by the
@@ -18,7 +18,7 @@ function [ b_p_data, max_b_p, problems] = ...
 %
 %OUTPUT:     -b_p_interval_data: This is the modified coordinate data
 %            in a cell array. The sheets contain the modified song data.
-%            -max_b_p: gives the maximal persistence and maximal
+%            -max_coords: gives the maximal persistence and maximal
 %            birth time across all point clouds for each song. 
 %            This information is used to create the boundaries for the
 %            persistence images.
@@ -61,7 +61,7 @@ song_max_persistence(k,1)=max(max(max_persistences(:,:,k)));
 %determine the maximum persistence of all song features across the point
 %clouds
 end
-max_b_p=[song_max_birth, song_max_persistence];
+max_coords=[song_max_birth, song_max_persistence];
 b_p_data=birth_persistence;
 
 end

@@ -29,7 +29,7 @@ function [ PIs ] = make_PIs(interval_data, res, sig, weight_func, params,...
 %OUTPUTS:    PIs - The set of persistence images generated based on the
 %            options specified for the provided interval data.
 
-[ coord_data, max_b_p, problems ] = ...
+[ coord_data, max_coords, problems ] = ...
     persistence_coords(interval_data, norm_fcn);
 
 %first do a check to make sure all the points (birth,persistence) points
@@ -76,38 +76,38 @@ elseif nargin==3
     res=res;
     sig=sig;
 	weight_func=@linear_ramp; %default setting is a linear weighting function
-    params=[0, max(max(max_b_p(:,2)))]; %default setting 0 at 0 and 1 at 
+    params=[0, max(max(max_coords(:,2)))]; %default setting 0 at 0 and 1 at 
     %the maximum persistence.
     type=1; %the default boundary setting is hard
 elseif nargin==2
     res=res;
-    sig=.5*(max(max(max_b_p(:,2)))/res);%the default setting for the 
+    sig=.5*(max(max(max_coords(:,2)))/res);%the default setting for the 
     %variance of the gaussians is equal to one half the height of a pixel.
     weight_func=@linear_ramp; %default setting is a linear weighting function
-    params=[0, max(max(max_b_p(:,2)))]; %default setting 0 at 0 and 1 at 
+    params=[0, max(max(max_coords(:,2)))]; %default setting 0 at 0 and 1 at 
     %the maximum persistence.
     type=1; %the default boundary setting is hard.
 elseif nargin==1
     res=25; %default resolution is equal to 25 pixels.
-    sig=.5*(max(max(max_b_p(:,2)))/res);%the default setting for the 
+    sig=.5*(max(max(max_coords(:,2)))/res);%the default setting for the 
     %variance of the gaussians is equal to one half the height of a pixel.
 	weight_func=@linear_ramp; %default setting is a linear weighting function
-    params=[0, max(max(max_b_p(:,2)))]; %default setting 0 at 0 and 1 at 
+    params=[0, max(max(max_coords(:,2)))]; %default setting 0 at 0 and 1 at 
     %the maximum persistence.
     type=1; %the default boundary setting is hard.
 end
     
     
 if type==1       
-    [ data_images ] = hard_bound_PIs( coord_data, max_b_p, weight_func, ...
+    [ data_images ] = hard_bound_PIs( coord_data, max_coords, weight_func, ...
         params, res,sig);
 elseif type==2
-    [ data_images ] = soft_bound_PIs( coord_data, max_b_p, weight_func, ...
+    [ data_images ] = soft_bound_PIs( coord_data, max_coords, weight_func, ...
         params, res,sig);
 end
     PIs=data_images;
 
-function [ data_images ] = hard_bound_PIs( coord_data, max_b_p, ...
+function [ data_images ] = hard_bound_PIs( coord_data, max_coords, ...
         weight_func, params, res, sig)
     
 %hard_bound_PIs generates the PIs for a set of point clouds with the
@@ -117,7 +117,7 @@ function [ data_images ] = hard_bound_PIs( coord_data, max_b_p, ...
 %   INPUTS:        coord_data - birth-persistence points for each of the
 %                  point clouds. Each sheet corresponds to a different
 %                  Betti dimension.
-%                  max_b_p - gives the maximal persistence and maximal
+%                  max_coords - gives the maximal persistence and maximal
 %                  birth time across all point clouds for each song. 
 %                  This information is used to create the boundaries for 
 %                  the persistence images.
@@ -137,8 +137,8 @@ function [ data_images ] = hard_bound_PIs( coord_data, max_b_p, ...
 data_images=cell(m,n,o);
 
 for k=1:o  
-song_max_b=1; %birth normalized betweon 0 to 1
-song_max_p=max_b_p(k,2); 
+song_max_b=1; %birth normalized between 0 to 1
+song_max_p=max_coords(k,2); 
 
 %set up gridding for song
 birth_stepsize_song=song_max_b/res; %the x-width of a pixel
@@ -163,7 +163,7 @@ end
 end
 
 
-function [ data_images ] = soft_bound_PIs( coord_data, max_b_p, ...
+function [ data_images ] = soft_bound_PIs( coord_data, max_coords, ...
         weight_func, params, res, sig)
     
 %soft_bound_PIs generates the PIs for a set of point clouds with the
@@ -173,7 +173,7 @@ function [ data_images ] = soft_bound_PIs( coord_data, max_b_p, ...
 %   INPUTS:        coord_data - birth-persistence points for each of the
 %                  point clouds. Each sheet corresponds to a different
 %                  song
-%                  max_b_p - gives the maximal persistence and maximal
+%                  max_coords - gives the maximal persistence and maximal
 %                  birth time across all point clouds for each song. 
 %                  This information is used to create the boundaries for 
 %                  the persistence images.
@@ -194,7 +194,7 @@ data_images=cell(m,n,o);
 
 for k=1:o    
 song_max_b=1; %birth normalized between 0 and 1
-song_max_p=max_b_p(k,2);    
+song_max_p=max_coords(k,2);    
     
 %set up gridding for song
 end_sig = sig(1,0);
