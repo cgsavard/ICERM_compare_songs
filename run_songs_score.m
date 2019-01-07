@@ -1,5 +1,5 @@
 
-% RUN_SONGS runs through every song and creates their persistence 
+% RUN_SONGS_SCORE runs through every song and creates their persistence 
 % images which are stored as matrices in the cell songs. COMPARE_SONGS
 % should be run next to find distances between the song matrices
 % just created
@@ -21,7 +21,7 @@ for ii = 1:num_songs
     %good2 = 0;
     song = string(fgetl(infile));
 
-    filename1 = strcat("../",data,"/Expanded/",song);
+    filename1 = strcat("ScoreData/",data,"/Expanded/",song);
     load (filename1);
     [p_matrix1] = make_p_diagram(full_matrix_no, full_key);
     if isempty(p_matrix1)
@@ -32,7 +32,7 @@ for ii = 1:num_songs
         songs{end+1,1} = p_matrix1;
     end
     
-    filename2 = strcat("../",data,"/NotExpanded/",song);
+    filename2 = strcat("ScoreData/",data,"/NotExpanded/",song);
     load (filename2);
     [p_matrix2] = make_p_diagram(full_matrix_no, full_key);
     if isempty(p_matrix2)
