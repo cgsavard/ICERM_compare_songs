@@ -1,4 +1,4 @@
-function [sigx, sigy] = sigma_parabolic(x, y)
+function [sigx, sigy] = sigma_parabolic(x, y, xnorm)
 
 % SIGMA_PARABOLIC uses a parabola for the variance at each x and y value.
 %
