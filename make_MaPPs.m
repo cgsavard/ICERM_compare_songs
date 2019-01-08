@@ -199,7 +199,8 @@ data_images = cell(m,n,o);
 
 for k = 1:o  
 song_max_x = 1; %start normalized between 0 to 1
-song_max_y = max_x_y(k,2); 
+%song_max_y = max_x_y(k,2); 
+song_max_y = params(2);
 
 %set up gridding for song
 x_stepsize_song = song_max_x/res; %the x-width of a pixel
