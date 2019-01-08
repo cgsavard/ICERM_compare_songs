@@ -23,7 +23,7 @@ function [ MaPPs ] = make_MaPPs(interval_data, res, sig, weight_func, params,...
 %            start_length coordinates as an input.
 %            type - refers to the declaration of a soft' or 'hard' with
 %            respect to the boundaries. type=1 produces hard bounds, type=2
-%            produces soft boundaries on the images.
+%            produces soft boundaries on the MaPPs.
 %
 %OUTPUTS:    MaPPs - The set of length images generated based on the
 %            options specified for the provided interval data.
@@ -116,7 +116,7 @@ function [ start_length_data, max_start_length, problems] = ...
 %            norm_fcn - the function used to normalize the points between
 %            0 and 1
 %
-%OUTPUT:     -b_p_interval_data: This is the modified coordinate data
+%OUTPUT:     -start_length_data: This is the modified coordinate data
 %            in a cell array. The sheets contain the modified song data.
 %            -max_start_length: gives the maximal length and maximal
 %            start time across all point clouds for each song. 

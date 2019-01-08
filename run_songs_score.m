@@ -65,6 +65,6 @@ params=[0,100]; %[min, max]
 norm_fcn = @norm_mid; %norm_mid or norm_lin
 type = 1;
  %use default setting for hard/soft bounds or specify type=0 or type=1
-[ PIs ] = make_MaPPs(songs, res, sig, weight_func, params, norm_fcn, type);
+[ MaPPs ] = make_MaPPs(songs, res, sig, weight_func, params, norm_fcn, type);
 
 toc
