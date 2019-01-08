@@ -14,4 +14,6 @@ eps = 1/2;
 alpha = h*(eps*(1+eps)+1/4);
 sigx = -alpha*(x+eps)*(x-(1+eps));
 sigy = .5*y+.5;
+
+
 end

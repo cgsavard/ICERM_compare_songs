@@ -42,7 +42,7 @@ for i=1:n
         %song PIs. 
         C=B(:,2)-B(:,1);
         %fcn to normalize births linearly between 0 and 1
-        b_norm = norm_fcn(B(:,1));
+        b_norm = norm_fcn(B);
         birth_persistence{j,i,k}=[b_norm, C];
         %birth-persistence coordinates for song
         D=find(C<0);

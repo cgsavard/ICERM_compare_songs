@@ -61,11 +61,10 @@ tic
 res=200; %changes the axes labels
 sig=@sigma_parabolic;
 weight_func=@linear_inc;
-params=[0,80]; %[min, max]
-norm_fcn = @norm_lin; %Cheb or norm_lin
+params=[0,100]; %[min, max]
+norm_fcn = @norm_mid; %norm_mid or norm_lin
 type = 1;
-persistence_coords = @norm_birth_persistence_coords;
  %use default setting for hard/soft bounds or specify type=0 or type=1
-[ PIs2 ] = make_PIs(songs, res, sig, weight_func, params, norm_fcn, type, persistence_coords);
+[ PIs ] = make_PIs(songs, res, sig, weight_func, params, norm_fcn, type);
 
 toc

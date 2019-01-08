@@ -43,7 +43,7 @@ for i=1:n
         %song PIs. 
         C=B(:,2)-B(:,1);
         %fcn to normalize midpoint linearly between 0 and 1
-        mid_norm = norm_fcn((B(:,2)+B(:,1))/2);
+        mid_norm = norm_fcn(B);
         
         midpoint_persistence{j,i,k}=[mid_norm, C];
         %birth-persistence coordinates for song

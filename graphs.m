@@ -1,21 +1,21 @@
 
+a = 5
+figure(5)
+imagesc(PIs{a,1})
 
-figure(2)
-imagesc(PIs{67,1})
-
-figure(3)
-birth = songs{67,1}(:,1);
-death = songs{67,1}(:,2);
+figure(6)
+birth = songs{a,1}(:,1);
+death = songs{a,1}(:,2);
 hold on
 title('Length vs. Midpoint')
 xlabel('Midpoint');
 ylabel('Length');
-scatter((death + birth)/2,(death - birth));
+scatter(((death + birth)/2)/(max(death)-min(birth)), (death - birth));
 
-figure(4)
+figure(7)
 hold on
 title('Length vs. Start')
-xlabel('Midpoint');
+xlabel('Start');
 ylabel('Length');
-scatter(birth, death-birth);
+scatter(birth/(max(birth)-min(birth)), death-birth);
 
