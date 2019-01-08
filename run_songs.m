@@ -6,7 +6,7 @@
 
 thresh = '05';
 shing = '6';
-filename = strcat("new_data/Thresh",thresh,"/Shingle",shing,"/mazurka*/*.mat");
+filename = strcat("ScoreData/Thresh",thresh,"_ShingleNumber",shing,"/mazurka*/*.mat");
 
 infiles = dir(char(filename));
 num_files = numel(infiles)
@@ -37,6 +37,6 @@ weight_func=@linear_inc;
 params=[0,80]; %[min, max]
 norm_fcn = @norm_lin; %Cheb or norm_lin
  %use default setting for hard/soft bounds or specify type=0 or type=1
-[ PIs ] = make_PIs(songs, res, sig, weight_func, params, norm_fcn);
+%[ PIs ] = make_PIs(songs, res, sig, weight_func, params, norm_fcn);
 
 toc

@@ -4,7 +4,7 @@
 % compares the pairings found with the truth data
 
 thresh = '05';
-shing = '12';
+shing = '6';
 truth_name = strcat("thresh",thresh,"_shing",shing,"_truth");
 
 % create the truth matrix to compare with

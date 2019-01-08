@@ -321,7 +321,7 @@ for k=1:size(song,1) %looks at each point in the song
     % The above line is implementing the procedure explained in https://en.wikipedia.org/wiki/Summed_area_table
 end
 
-%finding the max valume under the gaussian per pixel
+%finding the max volume under the gaussian per pixel
 integral_image=max(ZZ,[],3);
 
 end
