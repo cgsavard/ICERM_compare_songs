@@ -143,7 +143,7 @@ for i=1:n
         %song PIs. 
         C=B(:,2)-B(:,1);
         %fcn to normalize births linearly between 0 and 1
-        b_norm = norm_fcn(B(:,1));
+        b_norm = norm_fcn(B);
         birth_persistence{j,i,k}=[b_norm, C];
         %birth-persistence coordinates for song
         D=find(C<0);
@@ -155,7 +155,8 @@ for i=1:n
 
     end
 end
-song_max_birth(k,1)=1;
+%song_max_birth(k,1)=1;
+song_max_birth(k,1)=max(max(max_birth_times(:,:,k)));
 %determine the maximum birth time of all song features across the point
 %clouds
 song_max_persistence(k,1)=max(max(max_persistences(:,:,k)));
@@ -198,7 +199,7 @@ function [ data_images ] = hard_bound_PIs( b_p_data, max_b_p, ...
 data_images=cell(m,n,o);
 
 for k=1:o  
-song_max_b=1; %birth normalized betweon 0 to 1
+song_max_b=1; %birth normalized between 0 to 1
 song_max_p=max_b_p(k,2); 
 
 %set up gridding for song
@@ -212,8 +213,9 @@ grid_values2_song=song_max_p:-persistence_stepsize_song:0; %must be decreasing f
                 song=b_p_data{p,t,k}; %song birth persistence data
                 %CHANGES TO THE WIEGHT FUNCTION INPUTS HAPPEN IN THE ROW
                 %BELOW
+                xnorm = max_b_p(k,1);
                 [weights]=arrayfun(@(row) weight_func(song(row,:), params), 1:size(song,1))';
-                [sigmax, sigmay] = arrayfun(@(birth,pers) sig(birth,pers), song(:,1), song(:,2));
+                [sigmax, sigmay] = arrayfun(@(birth,pers) sig(birth,pers,xnorm), song(:,1), song(:,2));
                 sigma = [sigmax, sigmay];
                 %call the function that makes the image
                 [I_song] = grid_gaussian_bump(song, grid_values1_song, grid_values2_song, sigma,weights);  
