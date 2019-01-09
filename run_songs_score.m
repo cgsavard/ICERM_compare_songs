@@ -59,9 +59,9 @@ end
 tic
 
 res=200; %changes the axes labels
-sig=@sigma_parabolic;
-weight_func=@linear_inc;
-params=[0,100]; %[min, max]
+sig=@sigma_const;
+weight_func=@gaussian_y;
+params=[0,80]; %[min, max]
 norm_fcn = @norm_mid; %norm_mid or norm_lin
 type = 1;
  %use default setting for hard/soft bounds or specify type=0 or type=1

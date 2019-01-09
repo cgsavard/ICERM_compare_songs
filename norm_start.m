@@ -1,11 +1,12 @@
-function [b_lin_norm] = norm_lin(b_d_coords)
+function [b_lin_norm, b_norm] = norm_start(b_d_coords)
 
-% NORM_LIN normalizes all birth values linearly between 0 and 1
+% NORM_START normalizes all birth values linearly between 0 and 1
 %
 % Inputs: BIRTH - all birth values for a specific song
 %
 % Outputs: B_LIN_NORM - new linearly normalized birth values
-birth - b_d_coords(:,1);
+
+birth = b_d_coords(:,1);
 b_max = max(birth);
 b_min = min(birth);
 

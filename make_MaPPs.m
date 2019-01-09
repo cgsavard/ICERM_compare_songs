@@ -20,15 +20,15 @@ function [ MaPPs ] = make_MaPPs(interval_data, res, sig, weight_func, params,...
 %            params - the set of parameter values needing to be defined for
 %            the weighting function. 
 %            norm_fnc - the normalization function. Needs to be able to accept the
-%            start_length coordinates as an input.
+%            x_y coordinates as an input.
 %            type - refers to the declaration of a soft' or 'hard' with
 %            respect to the boundaries. type=1 produces hard bounds, type=2
-%            produces soft boundaries on the MaPPs.
+%            produces soft boundaries on the images.
 %
 %OUTPUTS:    MaPPs - The set of length images generated based on the
 %            options specified for the provided interval data.
 
-[ start_length_data, max_start_length, problems ] = ...
+[ x_y_data, max_x_y, problems ,norm_const] = ...
     norm_length_coords(interval_data, norm_fcn);
 
 %first checks to make sure all the points (start,length) points
@@ -67,43 +67,43 @@ elseif nargin == 3
     res = res;
     sig = sig;
 	weight_func = @linear_ramp; %default setting is a linear weighting function
-    params = [0, max(max(max_start_length(:,2)))]; %default setting 0 at 0 and 1 at 
+    params = [0, max(max(max_x_y(:,2)))]; %default setting 0 at 0 and 1 at 
     %the maximum length.
     type = 1; %the default boundary setting is hard
 elseif nargin == 2
     res = res;
-    sig = .5*(max(max(max_start_length(:,2)))/res);%the default setting for the 
+    sig = .5*(max(max(max_x_y(:,2)))/res);%the default setting for the 
     %variance of the gaussians is equal to one half the height of a pixel.
     weight_func = @linear_ramp; %default setting is a linear weighting function
-    params = [0, max(max(max_start_length(:,2)))]; %default setting 0 at 0 and 1 at 
+    params = [0, max(max(max_x_y(:,2)))]; %default setting 0 at 0 and 1 at 
     %the maximum length.
     type = 1; %the default boundary setting is hard.
 elseif nargin == 1
     res = 25; %default resolution is equal to 25 pixels.
-    sig = .5*(max(max(max_start_length(:,2)))/res);%the default setting for the 
+    sig = .5*(max(max(max_x_y(:,2)))/res);%the default setting for the 
     %variance of the gaussians is equal to one half the height of a pixel.
 	weight_func = @linear_ramp; %default setting is a linear weighting function
-    params = [0, max(max(max_start_length(:,2)))]; %default setting 0 at 0 and 1 at 
+    params = [0, max(max(max_x_y(:,2)))]; %default setting 0 at 0 and 1 at 
     %the maximum length.
     type=1; %the default boundary setting is hard.
 end
     
     
 if type == 1       
-    [ data_images ] = hard_bound_MaPPs( start_length_data, max_start_length, weight_func, ...
-        params, res,sig);
+    [ data_images ] = hard_bound_MaPPs( x_y_data, max_x_y, weight_func, ...
+        params, res,sig, norm_const);
 elseif type == 2
-    [ data_images ] = soft_bound_MaPPs( start_length_data, max_start_length, weight_func, ...
+    [ data_images ] = soft_bound_MaPPs( x_y_data, max_x_y, weight_func, ...
         params, res,sig);
 end
     MaPPs = data_images;
     
-function [ start_length_data, max_start_length, problems] = ...
+function [ x_y_data, max_x_y, problems, norm_const] = ...
         norm_length_coords(interval_data, norm_fcn )
     
 %norm_length_coords takes in the interval data as output by the
-%duke TDA code (start-end coordinates) and changes them into
-%start-length coordinates with start/midpoint normalized from 0 to 1
+%duke TDA code (x-y coordinates) and changes them into
+%x-y coordinates with start/midpoint normalized from 0 to 1
 %
 %INPUTS:     interval_data - is a cell array containing the interval data
 %            for all of the point clouds in consideration. Each sheet in
@@ -116,36 +116,36 @@ function [ start_length_data, max_start_length, problems] = ...
 %            norm_fcn - the function used to normalize the points between
 %            0 and 1
 %
-%OUTPUT:     -start_length_data: This is the modified coordinate data
+%OUTPUT:     -x_y_data: This is the modified coordinate data
 %            in a cell array. The sheets contain the modified song data.
-%            -max_start_length: gives the maximal length and maximal
+%            -max_x_y: gives the maximal length and maximal
 %            start time across all point clouds for each song. 
 %            This information is used to create the boundaries for the
 %            length images.
 
 [m,n,o] = size(interval_data);
-max_lengths = zeros(m,n,o);
-max_start_times = zeros(m,n,o);
-start_length = cell(m,n,o);
+max_y = zeros(m,n,o);
+max_x = zeros(m,n,o);
+x_y = cell(m,n,o);
 problems = [];
 
 for k = 1:o
 for i = 1:n
     for j = 1:m
-        B = interval_data{j,i,k};
+        data = interval_data{j,i,k};
         %pulls the song interval data for the (j,i)th point cloud.
-        max_lengths(j,i,k) = max(B(:,2)-B(:,1));
+        max_y(j,i,k) = max(data(:,2)-data(:,1));
         %computes the song length (end-start) for the songs
-        max_start_times(j,i,k) = max(B(:,1));
+        max_x(j,i,k) = max(data(:,1));
         %determines that maximal start time for that songs. We will take 
         %the maximum over all of point clouds to generate non-normalized 
         %song MaPPs. 
-        C = B(:,2)-B(:,1);
+        y = data(:,2)-data(:,1);
         %fcn to normalize starts linearly between 0 and 1
-        b_norm = norm_fcn(B);
-        start_length{j,i,k} = [b_norm, C];
+        [x_norm, norm_const] = norm_fcn(data);
+        x_y{j,i,k} = [x_norm, y];
         %start-length coordinates for song
-        D = find(C<0);
+        D = find(y<0);
         if length(D) > 0
             problems = [problems; j,i,k];
         elseif length(D) == 0
@@ -154,31 +154,31 @@ for i = 1:n
 
     end
 end
-%song_max_start(k,1)=1;
-song_max_start(k,1) = max(max(max_start_times(:,:,k)));
+%song_max_x(k,1)=1;
+song_max_x(k,1) = max(max(max_x(:,:,k)));
 %determine the maximum start time of all song features across the point
 %clouds
-song_max_length(k,1) = max(max(max_lengths(:,:,k)));
+song_max_y(k,1) = max(max(max_y(:,:,k)));
 %determine the maximum length of all song features across the point
 %clouds
 end
-max_start_length = [song_max_start, song_max_length];
-start_length_data = start_length;
+max_x_y = [song_max_x, song_max_y];
+x_y_data = x_y;
 
 end
 
 
-function [ data_images ] = hard_bound_MaPPs( start_length_data, max_start_length, ...
-        weight_func, params, res, sig)
+function [ data_images ] = hard_bound_MaPPs( x_y_data, max_x_y, ...
+        weight_func, params, res, sig, norm_const)
     
 %hard_bound_MaPPs generates the MaPPs for a set of point clouds with the
-%start_length_data. Hard refers to the fact that we cut the boundaries off hard at
+%x_y_data. Hard refers to the fact that we cut the boundaries off hard at
 %the maximum values. 
 %
-%   INPUTS:        start_length_data - start-length points for each of the
+%   INPUTS:        x_y_data - start-length points for each of the
 %                  point clouds. Each sheet corresponds to a different
 %                  Betti dimension.
-%                  max_start_length - gives the maximal length and maximal
+%                  max_x_y - gives the maximal length and maximal
 %                  start time across all point clouds for each song. 
 %                  This information is used to create the boundaries for 
 %                  the length images.
@@ -194,27 +194,26 @@ function [ data_images ] = hard_bound_MaPPs( start_length_data, max_start_length
 %                  corresponds to the MaPPs generated for different song
 %                  interval data.
 
-[m,n,o] = size(start_length_data);
+[m,n,o] = size(x_y_data);
 data_images = cell(m,n,o);
 
 for k = 1:o  
-song_max_start = 1; %start normalized between 0 to 1
-song_max_length = max_start_length(k,2); 
+song_max_x = 1; %start normalized between 0 to 1
+song_max_y = max_x_y(k,2); 
 
 %set up gridding for song
-start_stepsize_song = song_max_start/res; %the x-width of a pixel
-length_stepsize_song = song_max_length/res; %the y-height of a pixel
-grid_values1_song = 0:start_stepsize_song:song_max_start; %must be increasing from zero to max_dist
-grid_values2_song = song_max_length:-length_stepsize_song:0; %must be decreasing from max_dist to zero
+x_stepsize_song = song_max_x/res; %the x-width of a pixel
+y_stepsize_song = song_max_y/res; %the y-height of a pixel
+grid_values1_song = 0:x_stepsize_song:song_max_x; %must be increasing from zero to max_dist
+grid_values2_song = song_max_y:-y_stepsize_song:0; %must be decreasing from max_dist to zero
 
             for p = 1:m
                 for t = 1:n
-                song = start_length_data{p,t,k}; %song start length data
+                song = x_y_data{p,t,k}; %song start length data
                 %CHANGES TO THE WIEGHT FUNCTION INPUTS HAPPEN IN THE ROW
                 %BELOW
-                xnorm = max_start_length(k,1);
                 [weights] = arrayfun(@(row) weight_func(song(row,:), params), 1:size(song,1))';
-                [sigmax, sigmay] = arrayfun(@(start, length) sig(start, length, xnorm), song(:,1), song(:,2));
+                [sigmax, sigmay] = arrayfun(@(start, length) sig(start, length, norm_const), song(:,1), song(:,2));
                 sigma = [sigmax, sigmay];
                 %call the function that makes the image
                 [I_song] = grid_SuPP_to_MaPP(song, grid_values1_song, grid_values2_song, sigma,weights);  
@@ -225,17 +224,17 @@ end
 end
 
 
-function [ data_images ] = soft_bound_MaPPs( start_length_data, max_start_length, ...
+function [ data_images ] = soft_bound_MaPPs( x_y_data, max_x_y, ...
         weight_func, params, res, sig)
     
 %soft_bound_MaPPs generates the MaPPs for a set of point clouds with the
-%start_length_data. Soft refers to the fact that we add three times the variance
+%x_y_data. Soft refers to the fact that we add three times the variance
 % to the maximal values to determine our boundaries.
 %
-%   INPUTS:        start_length_data - start-length points for each of the
+%   INPUTS:        x_y_data - start-length points for each of the
 %                  point clouds. Each sheet corresponds to a different
 %                  song
-%                  max_start_length - gives the maximal length and maximal
+%                  max_x_y - gives the maximal length and maximal
 %                  start time across all point clouds for each song. 
 %                  This information is used to create the boundaries for 
 %                  the length images.
@@ -251,23 +250,23 @@ function [ data_images ] = soft_bound_MaPPs( start_length_data, max_start_length
 %                  corresponds to the MaPPs generated for different song
 %                  interval data.
 
-[m,n,o] = size(start_length_data);
+[m,n,o] = size(x_y_data);
 data_images = cell(m,n,o);
 
 for k = 1:o    
-song_max_start = 1; %start normalized between 0 and 1
-song_max_length = max_start_length(k,2);    
+song_max_x = 1; %start normalized between 0 and 1
+song_max_y = max_x_y(k,2);    
     
 %set up gridding for song
 end_sig = sig(1,0);
-start_stepsize_song = (song_max_start+3*end_sig)/res; %the x-width of a pixel
-length_stepsize_song = (song_max_length+3*end_sig)/res; %the y-height of a pixel
-grid_values1_song = 0:start_stepsize_song:(song_max_start+3*end_sig); %must be increasing from zero to max_dist
-grid_values2_song = (song_max_length+3*end_sig):-length_stepsize_song:0; %must be decreasing from max_dist to zero
+x_stepsize_song = (song_max_x+3*end_sig)/res; %the x-width of a pixel
+y_stepsize_song = (song_max_y+3*end_sig)/res; %the y-height of a pixel
+grid_values1_song = 0:x_stepsize_song:(song_max_x+3*end_sig); %must be increasing from zero to max_dist
+grid_values2_song = (song_max_y+3*end_sig):-y_stepsize_song:0; %must be decreasing from max_dist to zero
 
             for p = 1:m
                 for t = 1:n
-                song = start_length_data{p,t,k}; %start-length data
+                song = x_y_data{p,t,k}; %start-length data
                 %CHANGES TO THE WIEGHT FUNCTION INPUTS HAPPEN IN THE ROW
                 %BELOW
                 [weights] = arrayfun(@(row) weight_func(song(row,:), params), 1:size(song,1))';
@@ -289,7 +288,7 @@ function [integral_image] = grid_SuPP_to_MaPP(song, grid_values1_song, grid_valu
 %
 %Inputs:        BPPairs - is the matrix containing the (start, length)
 %               pairs for each interval. This comes from calling the
-%               start_length_coordinate funtion.
+%               x_y_coordinate funtion.
 %               grid_values1_song - is a vector containing the boundaries 
 %               for the start values (increasing)
 %               grid_values2_song - is a vector containing the boundaries

@@ -1,21 +1,24 @@
-function [mid_norm] = norm_mid(b_d_coords)
+function [mid_norm, norm] = norm_mid(x_y_coords)
 
-% NORM_MID normalizes all midpoint values between 0 and 1 given the max
-% death and min birth
+% NORM_MID normalizes all start values between 0 and 1 given the max
+% and min x
 %
-% Inputs: BIRTH - all birth values for a specific song
+% Inputs: X_Y_COORDS - all x,y coords in SuPP
 %
-% Outputs: B_LIN_NORM - new linearly normalized birth values
+% Outputs: X_NORM - new linearly normalized x values
+%          NORM - normalization constant for x values
 
-birth = b_d_coords(:,1);
-death = b_d_coords(:,2);
-d_max = max(death);
-b_min = min(birth);
+s = x_y_coords(:,1); %start and end
+e = x_y_coords(:,2);
 
-norm = d_max - b_min;
-midpoint = (birth + death)/2;
+mid = (s+e)./2;
 
-mid_norm = midpoint/norm;
+mid_max = max(mid);
+mid_min = min(mid);
+
+norm = mid_max - mid_min;
+mid_norm = (mid-mid_min)./norm;
 
 end
+
 
