@@ -1,4 +1,4 @@
-function [precision_value, recall_value] = pr_values(test_M, truth_M)
+function [precision_value, recall_value, recall_wrong] = pr_values(test_M, truth_M)
 
 % PR_VALUES solves for the precision and recall value of the test data
 % when compared to the truth data
@@ -20,5 +20,7 @@ num_songs = length(truth_M);
 
 precision_value = num_correct_matches/num_matched;
 recall_value = num_correct_matches/num_songs;
+
+recall_wrong = find((test_M - truth_M))';
 
 end

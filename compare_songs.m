@@ -15,7 +15,7 @@ truth_M = temp.truth_vec;
 % compute distance matrix from PIs outputted by L1 and L2
 %D = L1_M_dist(PIs);
 tic
-D = L2_M_dist(PIs);
+D = L2_M_dist(MaPPs);
 toc
 
 % match these songs using either nearest neighbor or mutual nearest
@@ -27,6 +27,8 @@ matches = mutual_nn(D,1); %int indicates times you would like to pair the unpair
 %toc
 
 % ouput the precision recall values
-[p_value, r_value] = pr_values(matches, truth_M)
+[p_value, r_value, r_wrong] = pr_values(matches, truth_M);
+p_value
+r_value
 
 
