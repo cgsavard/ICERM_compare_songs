@@ -12,10 +12,10 @@ temp = load(strcat("TruthData/",truth_name,".mat"));
 truth_M = temp.truth_vec;
 %truth_M = make_truth_matrix;
 
-% compute distance matrix from PIs outputted by L1 and L2
-%D = L1_M_dist(PIs);
+% compute distance matrix from MaPPs outputted by L1 and L2
+%D = L1_M_dist(MaPPs);
 tic
-D = L2_M_dist(PIs);
+D = L2_M_dist(MaPPs);
 toc
 
 % match these songs using either nearest neighbor or mutual nearest
