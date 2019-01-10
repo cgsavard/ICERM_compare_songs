@@ -60,10 +60,10 @@ tic
 
 res=200; %changes the axes labels
 sig=@sigma_const;
-weight_func=@gaussian_y;
+weight_func=@linear_dec;
 params=[0,80]; %[min, max]
 norm_fcn = @norm_mid; %Cheb or norm_lin
  %use default setting for hard/soft bounds or specify type=0 or type=1
-[ PIs ] = make_MaPPs(songs, res, sig, weight_func, params, norm_fcn);
+[ MaPPs ] = make_MaPPs(songs, res, sig, weight_func, params, norm_fcn);
 
 toc
